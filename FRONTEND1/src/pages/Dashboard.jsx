@@ -80,8 +80,8 @@ const Dashboard = () => {
   }, 0);
 
   const stats = [
-    { title: "amaahda maanta", value: "$12,345", change: "+12%", icon: <DollarSign size={20} />, path: "/DialyLiability" },
-    { title: "iibka maanta", value: "1,234", change: "+7%", icon: <ShoppingCart size={20} />, path: "/DailySales" },
+    { title: "amaahda maanta", value: "view", change: "#", icon: <DollarSign size={20} />, path: "/DialyLiability" },
+    { title: "iibka maanta", value: `$${totalSales}` , change: "$", icon: <ShoppingCart size={20} />, path: "/DailySales" },
     { title: "staff", value: "3", icon: <Users size={20} />, path: "/UserProducts" },
     { title: "Taariikhda iibka", value: "View", icon: <FileText size={20} />, path: "/HistorySalesDate" },
   ];
