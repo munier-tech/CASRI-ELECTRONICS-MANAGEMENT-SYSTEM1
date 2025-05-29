@@ -86,7 +86,7 @@ const AddDailyProduct = () => {
                   animate="visible"
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-2  items-center">
                     <Tag className="mr-2 text-emerald-500" size={16} />
                     MAGACA ALAABTA
                   </label>
@@ -109,7 +109,7 @@ const AddDailyProduct = () => {
                   animate="visible"
                   transition={{ delay: 0.4 }}
                 >
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-2  items-center">
                     <FileText className="mr-2 text-emerald-500" size={16} />
                     FAAHFAAHINTA
                   </label>

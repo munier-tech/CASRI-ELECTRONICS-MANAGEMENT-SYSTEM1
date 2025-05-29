@@ -87,7 +87,7 @@ const AddDailyLiability = () => {
                   animate="visible"
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-2  items-center">
                     <User className="mr-2 text-rose-500" size={16} />
                     MAGACA SHAKHSIGA
                   </label>
