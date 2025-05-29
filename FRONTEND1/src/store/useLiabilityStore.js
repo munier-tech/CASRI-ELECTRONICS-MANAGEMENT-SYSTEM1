@@ -65,4 +65,17 @@ export const useLiabilityStore = create((set) => ({
       set({ isLoading: false });
     }
   },
+ handleMarkAsPaid : async (id) => {
+  try {
+    set({isLoading : true})
+    await axios.patch(`/Liability/paid/${id}`);
+    toast.success("Marked as paid");
+
+    // Refetch or filter out from UI
+    setLiabilities(prev => prev.filter(item => item._id !== id));
+  } catch (error) {
+    toast.error(error?.response?.data?.message);
+    set({ isLoading : false})
+  }
+}
 }));

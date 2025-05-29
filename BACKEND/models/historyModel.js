@@ -32,6 +32,10 @@ const historySchema = new mongoose.Schema({
       category: {
         type: String,
       },
+      quantity: {
+        type: Number,
+        default: 1, // Default quantity
+      },
       user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -57,6 +61,10 @@ const historySchema = new mongoose.Schema({
       price: {
         type: Number,
         required: true,
+      },
+      quantity: {
+        type: Number,
+        default: 1, // Default quantity
       },
       description: {
         type: String,

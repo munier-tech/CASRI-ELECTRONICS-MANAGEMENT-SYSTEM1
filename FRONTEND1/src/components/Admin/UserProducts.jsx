@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Loader } from "lucide-react";
+import { Loader, ShieldCheck } from "lucide-react";
 import { useProductsStore } from "@/store/useProductsStore";
 
 const UsersDailyProductsComponent = () => {
@@ -40,10 +40,29 @@ const UsersDailyProductsComponent = () => {
     );
   }
 
+  // Determine the hero user
+  const sortedUsers = [...usersWithProducts].sort(
+    (a, b) => b.products.length - a.products.length
+  );
+  const heroUser = sortedUsers[0];
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold text-white text-center">Today's Sales Performance</h1>
 
+      {/* Hero Box */}
+      <div className="bg-yellow-300 rounded-xl shadow-md p-6 text-center text-black">
+        <div className="flex justify-center items-center gap-2 mb-2">
+          <ShieldCheck className="w-6 h-6 text-black" />
+          <h2 className="text-2xl font-bold">Hero of the Day</h2>
+        </div>
+        <p className="text-lg font-semibold">
+          {heroUser.username} — {heroUser.products.length}{" "}
+          {heroUser.products.length === 1 ? "sale" : "sales"}
+        </p>
+      </div>
+
+      {/* Original User Cards (unchanged) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {usersWithProducts.map(({ username, role, products }) => (
           <div

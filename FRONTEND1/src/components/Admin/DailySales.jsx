@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useProductsStore } from "@/store/useProductsStore";
 import { Loader2, TrendingUp, DollarSign, Package, Trash2, X } from "lucide-react";
+import dayjs from "dayjs";
 
 const DailySales = () => {
   const {
@@ -70,6 +71,14 @@ const DailySales = () => {
       bgColor: "bg-pink-700",
     },
   ];
+
+  useEffect(() => {
+  const today = dayjs().format("DD-MM-YYYY");
+  if (date !== today) {
+    getDailyproducts();
+  }
+}, [date, getDailyproducts]);
+
 
   return (
     <motion.div

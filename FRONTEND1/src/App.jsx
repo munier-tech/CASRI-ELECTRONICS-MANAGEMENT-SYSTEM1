@@ -13,11 +13,11 @@ import DailySales from './components/Admin/DailySales';
 import UsersDailyProductsComponent from './components/Admin/UserProducts';
 import DailySalesList from './components/UserActivities/ListDailyProducts';
 import UserProductHistory from './components/UserActivities/UserProductHistory';
-import HistoryLiability from './components/Admin/HistoryLiability';
 import DialyLiability from './components/Admin/DailyLiability';
 import AddDailyLiability from './components/UserActivities/AddLiability';
 import ProductsSoldByDate from './components/Admin/productsByDate';
 import Profile from './components/profile';
+import GetLiabilityByDate from './components/Admin/LiabilityByDate';
 
 const App = () => {
   const { checkAuth, user, isLoading, authChecked } = useUserStore();
@@ -54,15 +54,14 @@ const App = () => {
           <Route path="product-history" element={user ? <UserProductHistory /> : <Navigate to="/signin" />} />
           <Route path="/UserProducts" element={user ? <UsersDailyProductsComponent /> : <Navigate to="/signin" />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/signin" />} />
-          <Route path="/HistoryLiability" element={user?.role === "admin" ? <HistoryLiability /> : <Navigate to="/" />} />
+          <Route path="/HistoryLiabilityByDate" element={user?.role === "admin" ? <GetLiabilityByDate /> : <Navigate to="/" />} />
           <Route path="/DialyLiability" element={user?.role === "admin" ? <DialyLiability /> : <Navigate to="/" />} />
           <Route path="/dashboard" element={user?.role === "admin" ? <Dashboard /> : <Navigate to="/" />} />
           <Route path="/dailysales" element={user?.role === "admin" ? <DailySales /> : <Navigate to="/" />} />
         </Routes>
       </div>
-  
       <Toaster position="top-center" />
-    </div>
+      </div>
   );
 };
 

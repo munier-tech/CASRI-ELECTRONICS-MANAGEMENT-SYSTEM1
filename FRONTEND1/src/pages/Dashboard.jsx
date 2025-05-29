@@ -84,11 +84,12 @@ const Dashboard = () => {
     { title: "iibka maanta", value: `$${totalSales}` , change: "$", icon: <ShoppingCart size={20} />, path: "/DailySales" },
     { title: "staff", value: "3", icon: <Users size={20} />, path: "/UserProducts" },
     { title: "Taariikhda iibka", value: "View", icon: <FileText size={20} />, path: "/HistorySalesDate" },
+    { title: "Taariikhda Amaahda", value: "View", icon: <FileText size={20} />, path: "/HistoryLiabilityByDate" },
   ];
 
   return (
     <motion.div
-      className="min-h-screen mt-14 rounded-md bg-gray-50 p-4 md:p-8"
+      className="min-h-screen mt-14 rounded-md bg-transparent backdrop:blur p-4 md:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
@@ -127,7 +128,7 @@ const Dashboard = () => {
                   { icon: FileText, label: "taarikhda iibka hore", path: "/HistorySalesDate" },
                   { icon: User, label: "shaqaalaha", path: "/UserProducts" },
                   { icon: CreditCard, label: "amaahda maanta", path: "/DialyLiability" },
-                  { icon: CreditCard, label: "taarikhda amaahda", path: "/HistoryLiability" },
+                  { icon: CreditCard, label: "taarikhda amaahda", path: "/HistoryLiabilityByDate" },
                 ].map((item, index) => (
                   <motion.div key={index} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Link

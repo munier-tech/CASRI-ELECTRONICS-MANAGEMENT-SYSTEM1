@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import History from "../models/historyModel.js";
+import Liability from "../models/LiabilityModel.js";
 
 export const getMyDailySales = async (req, res) => {
   try {
@@ -112,6 +113,50 @@ export const getSingleUserHistoryByDate = async (req, res) => {
    }
  };
  
+
+ export const getLiabilityByDate = async (req , res) => {
+  try {
+
+    const { date  } = req.params;
+
+    if (!date) {
+      return res.status(400).json({ message: "Date parameter is required." });
+    }
+
+    const startOfDay = dayjs(date).startOf("day").toDate();
+    const endOfDay = dayjs(date).endOf("day").toDate();
+
+
+    const historyRecords1 = await History.find({
+      date : { $gte: startOfDay, $lte: endOfDay }
+    })
+
+    if (!historyRecords1 || historyRecords1.length === 0) {
+      return res.status(404).json({ message: `No liabilities found on ${date}.` });
+    }
+    
+
+   
+    
+
+   const allLiabilities = historyRecords1.flatMap(record =>
+    record.Liability.map(liability => ({
+    name : liability.name,
+    description: liability.description,
+    price: liability.price,
+    quantity: liability.quantity || 1,
+    user: record.user || "Unknown User",
+    soldAt: record.date,
+  }))
+);
+
+    res.status(200).json({ message : "Liabilities fetched successfully.", data: allLiabilities  });
+    
+  } catch (error) {
+    console.error("Error in getLiabilityByDate:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+ }
 
 
 

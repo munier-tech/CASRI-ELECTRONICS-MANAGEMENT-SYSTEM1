@@ -3,6 +3,14 @@ import toast from "react-hot-toast";
 import axios from "../lib/axios";
 import dayjs from "dayjs";
 
+const noCache = {
+  headers: {
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+  },
+  params: { ts: Date.now() }, // unique timestamp to bust cache
+};
+
 export const useProductsStore = create((set) => ({
   products: [],
   username: null,
@@ -14,7 +22,7 @@ export const useProductsStore = create((set) => ({
   getProducts: async () => {
     try {
       set({ isLoading: true });
-      const { data } = await axios.get("/products/getAll");
+      const { data } = await axios.get("/products/getAll", noCache);
       set({ products: data, isLoading: false });
       toast.success("Products fetched successfully");
     } catch (error) {
@@ -24,9 +32,9 @@ export const useProductsStore = create((set) => ({
   },
 
   getMyDailyProducts: async () => {
-    set({ isLoading: true });
     try {
-      const { data } = await axios.get("/products/getMydaily");
+      set({ isLoading: true });
+      const { data } = await axios.get("/products/getMydaily", noCache);
       set({
         products: data.products || [],
         isLoading: false,
@@ -42,7 +50,7 @@ export const useProductsStore = create((set) => ({
   addProduct: async (productData) => {
     try {
       set({ isLoading: true });
-      const { data } = await axios.post("/products/addProduct", productData);
+      const { data } = await axios.post("/products/addProduct", productData, noCache);
       set((state) => ({
         products: [...state.products, data],
         isLoading: false,
@@ -57,7 +65,7 @@ export const useProductsStore = create((set) => ({
   deleteProduct: async (id) => {
     try {
       set({ isLoading: true });
-      await axios.delete(`/products/delete/${id}`);
+      await axios.delete(`/products/delete/${id}`, noCache);
       set((state) => ({
         products: state.products.filter((product) => product._id !== id),
         isLoading: false,
@@ -72,7 +80,7 @@ export const useProductsStore = create((set) => ({
   updateProduct: async (id, productData) => {
     try {
       set({ isLoading: true });
-      const { data } = await axios.put(`/products/update/${id}`, productData);
+      const { data } = await axios.put(`/products/update/${id}`, productData, noCache);
       set((state) => ({
         products: state.products.map((product) =>
           product._id === id ? data : product
@@ -89,7 +97,7 @@ export const useProductsStore = create((set) => ({
   getUsersDailyProducts: async () => {
     try {
       set({ isLoading: true });
-      const response = await axios.get("/products/getAllUserProducts");
+      const response = await axios.get("/products/getAllUserProducts", noCache);
       set({ usersWithProducts: response.data.data, isLoading: false });
       toast.success("Users' daily products fetched successfully");
     } catch (error) {
@@ -101,7 +109,7 @@ export const useProductsStore = create((set) => ({
   getDailyproducts: async () => {
     try {
       set({ isLoading: true });
-      const response = await axios.get("/products/getAlldaily");
+      const response = await axios.get("/products/getAlldaily", noCache);
       set({ products: response.data.products || [], isLoading: false });
       toast.success("Daily products fetched successfully");
     } catch (error) {

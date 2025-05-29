@@ -13,7 +13,11 @@ const LiabilitySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  createdAt: {
+  quantity: {
+    type: Number,
+    default: 1,
+  },
+  soldAt: {
     type: Date,
     default: Date.now,
   },
@@ -21,10 +25,17 @@ const LiabilitySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isPaid: {
+    type: Boolean,
+    default: false,
+  },
+  paidAt: {
+    type: Date,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", 
-    required : true    // <-- Reference to the User model
+    ref: "User",
+    required: true,
   }
 });
 
