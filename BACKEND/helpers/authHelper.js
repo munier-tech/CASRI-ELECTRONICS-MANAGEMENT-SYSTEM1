@@ -31,16 +31,20 @@ export const storeRefreshToken = async (userId,refreshToken) => {
 
 
 export const setCookies = async (res, refreshToken, accessToken) => {
- res.cookie("accessToken" , accessToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-  maxAge: 60 * 60 * 24 * 365,
- }),
- res.cookie("refreshToken" , refreshToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-  maxAge: 60 * 60 * 24 * 365,
- })
-}
+  const oneYear = 1000 * 60 * 60 * 24 * 365; // 1 year in ms
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: oneYear,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: oneYear,
+  });
+};
+
