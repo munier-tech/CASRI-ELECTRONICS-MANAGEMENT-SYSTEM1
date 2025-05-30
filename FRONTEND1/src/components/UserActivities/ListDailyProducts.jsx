@@ -205,6 +205,15 @@ const DailySalesList = () => {
               />
             </div>
             <div>
+              <label className="block text-gray-400 text-sm mb-1">Quantity</label>
+              <input
+                type="number"
+                className="w-full p-3 bg-gray-700 rounded-lg text-white"
+                value={formState.quantity}
+                onChange={(e) => setFormState({...formState, quantity: Number(e.target.value)})}
+              />
+            </div>
+            <div>
               <label className="block text-gray-400 text-sm mb-1">Price</label>
               <input
                 type="number"

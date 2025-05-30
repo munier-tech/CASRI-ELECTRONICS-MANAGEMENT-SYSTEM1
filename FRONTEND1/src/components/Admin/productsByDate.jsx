@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import dayjs from 'dayjs';
-import { useUserStore } from '@/store/useUserStore';
+import { Loader } from 'lucide-react';
 
 const ProductsSoldByDate = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'));
   const { products, isLoading, getProductsSoldByDate } = useHistoryStore();
-  const { user } = useUserStore()
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,7 +15,7 @@ const ProductsSoldByDate = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Product Sales by Date</h1>
         
@@ -40,7 +39,7 @@ const ProductsSoldByDate = () => {
               disabled={isLoading}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Searching...' : 'Search'}
+              {isLoading ? <Loader className='animate-spin'/> : 'Search'}
             </button>
           </div>
         </form>
@@ -59,38 +58,42 @@ const ProductsSoldByDate = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Quantity
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sold By
+                      Total
                     </th>
-                    
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
                     <tr key={product._id}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.description}</div>
+                        <div className="font-medium text-gray-900">{product.name.toLocaleUpperCase()}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{product.description.toLocaleUpperCase()}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {product.quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${product.price.toFixed(2)}
                       </td>
-                     
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user?.username || 'Unknown'}
+                        ${((product.price || 0) * (product.quantity || 1)).toFixed(2)}
                       </td>
                     </tr>
                   ))}
-                  
-                     
-                     
-                    
-                
                 </tbody>
               </table>
             </div>

@@ -96,6 +96,7 @@ export const getSingleUserHistoryByDate = async (req, res) => {
          name: product.name,
          description: product.description,
          price: product.price,
+         quantity : product.quantity,
          user: record.user || "Unknown User",
          soldAt: record.date,
        }))

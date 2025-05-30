@@ -163,9 +163,9 @@ export const getUsersDailyProducts = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, price, category } = req.body;
+    const { name, description, price, quantity , category } = req.body;
 
-    if (!name && !description && !price) {
+    if (!name && !description && !price && !quantity) {
       return res.status(400).json({ message: "At least one product field is required." });
     }
 
@@ -178,6 +178,7 @@ export const updateProduct = async (req, res) => {
     product.name = name || product.name;
     product.price = price || product.price;
     product.description = description || product.description;
+    product.quantity = quantity || product.quantity;
     product.category = category || product.category;
     product.updatedAt = Date.now();
 
