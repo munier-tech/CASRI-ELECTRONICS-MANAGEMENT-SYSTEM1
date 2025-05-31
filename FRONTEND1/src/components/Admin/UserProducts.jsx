@@ -40,9 +40,24 @@ const UsersDailyProductsComponent = () => {
     );
   }
 
-  // Determine the hero user
-  const sortedUsers = [...usersWithProducts].sort(
-    (a, b) => b.products.length - a.products.length
+  // Calculate totals for each user and find hero user
+  const usersWithTotals = usersWithProducts.map(user => {
+    const totalSales = user.products.reduce((sum, product) => {
+      return sum + (product.price || 0) * (product.quantity || 1);
+    }, 0);
+    const totalQuantity = user.products.reduce((sum, product) => {
+      return sum + (product.quantity || 1);
+    }, 0);
+    
+    return {
+      ...user,
+      totalSales,
+      totalQuantity
+    };
+  });
+
+  const sortedUsers = [...usersWithTotals].sort(
+    (a, b) => b.totalSales - a.totalSales
   );
   const heroUser = sortedUsers[0];
 
@@ -50,21 +65,23 @@ const UsersDailyProductsComponent = () => {
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold text-white text-center">Today's Sales Performance</h1>
 
-      {/* Hero Box */}
+      {/* Hero Box - now shows total sales amount */}
       <div className="bg-yellow-300 rounded-xl shadow-md p-6 text-center text-black">
         <div className="flex justify-center items-center gap-2 mb-2">
           <ShieldCheck className="w-6 h-6 text-black" />
           <h2 className="text-2xl font-bold">Hero of the Day</h2>
         </div>
         <p className="text-lg font-semibold">
-          {heroUser.username} — {heroUser.products.length}{" "}
-          {heroUser.products.length === 1 ? "sale" : "sales"}
+          {heroUser.username} — ${heroUser.totalSales.toFixed(2)} in sales
+        </p>
+        <p className="text-sm mt-1">
+          Sold {heroUser.totalQuantity} {heroUser.totalQuantity === 1 ? 'item' : 'items'} across {heroUser.products.length} {heroUser.products.length === 1 ? 'transaction' : 'transactions'}
         </p>
       </div>
 
-      {/* Original User Cards (unchanged) */}
+      {/* User Cards with enhanced sales information */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {usersWithProducts.map(({ username, role, products }) => (
+        {usersWithTotals.map(({ username, role, products, totalSales, totalQuantity }) => (
           <div
             key={username}
             className="bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
@@ -80,33 +97,53 @@ const UsersDailyProductsComponent = () => {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">{username}</h2>
-                <p className="text-sm text-gray-400">
-                  {products.length} {products.length === 1 ? "sale" : "sales"} today
-                </p>
+                <div className="flex gap-4 text-sm text-gray-400">
+                  <span>{products.length} {products.length === 1 ? "sale" : "sales"}</span>
+                  <span>{totalQuantity} {totalQuantity === 1 ? "item" : "items"}</span>
+                  <span className="font-semibold text-green-400">${totalSales.toFixed(2)}</span>
+                </div>
               </div>
             </div>
 
             <div className="p-4 space-y-4 rounded-b-md">
               {products.length > 0 ? (
-                products.map((product) => (
-                  <div
-                    key={product._id}
-                    className="flex items-start justify-between p-4 bg-white rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold truncate">{product.name.toUpperCase()}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {product.description}
-                      </p>
-                    </div>
-                    <div className="ml-4 flex flex-col items-end">
-                      <span className="font-bold text-green-600 text-lg">${product.price}</span>
-                      <span className="mt-1 px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded">
-                        Sold
-                      </span>
+                <>
+                  {products.map((product) => {
+                    const productTotal = (product.price || 0) * (product.quantity || 1);
+                    return (
+                      <div
+                        key={product._id}
+                        className="flex items-start justify-between p-4 bg-white rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold truncate">{product.name.toUpperCase()}</h3>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {product.description}
+                          </p>
+                        </div>
+                        <div className="ml-4 flex flex-col items-end">
+                          <div className="text-right">
+                            <span className="font-bold text-green-600 text-lg">${product.price.toFixed(2)}</span>
+                            <span className="block text-sm text-gray-600">x {product.quantity || 1}</span>
+                          </div>
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded">
+                              Sold
+                            </span>
+                            <span className="font-bold text-black">${productTotal.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="flex justify-between items-center p-3 bg-gray-700 rounded-lg">
+                    <span className="font-semibold text-white">Total:</span>
+                    <div className="text-right">
+                      <span className="block font-bold text-yellow-400">${totalSales.toFixed(2)}</span>
+                      <span className="text-xs text-gray-300">{totalQuantity} {totalQuantity === 1 ? 'item' : 'items'}</span>
                     </div>
                   </div>
-                ))
+                </>
               ) : (
                 <div className="text-center py-6 text-gray-400">No products sold today</div>
               )}

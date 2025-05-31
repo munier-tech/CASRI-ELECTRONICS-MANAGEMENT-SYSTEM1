@@ -5,6 +5,7 @@ import userRouter from "./Routes/userRoute.js"
 import productRouter from "./Routes/productsRouter.js"
 import historyRouter from "./Routes/historyRoute.js"
 import liabilityRouter from "./Routes/LiabilityRoute.js"
+import financialRouter from "./Routes/financialRoute.js"
 import { connectdb } from "./lib/connectDB.js"
 import cors from "cors"
 import cookieParser from "cookie-parser"
@@ -31,6 +32,7 @@ app.use("/api/user", userRouter)
 app.use("/api/products", productRouter)
 app.use("/api/history", historyRouter)
 app.use("/api/liability", liabilityRouter)
+app.use("/api/financial", financialRouter)
 
 
 if (process.env.NODE_ENV === "production") {
