@@ -242,3 +242,33 @@ export const getMyDailyProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const getProductsByDate = async (req, res) => {
+  try {
+    const { date } = req.params; // expected: '2025-05-30'
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+
+    const startOfDay = dayjs(date).startOf("day").toDate();
+    const endOfDay = dayjs(date).endOf("day").toDate();
+
+    const products = await Product.find({
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: `No data found for ${date}` });
+    }
+
+    res.status(200).json({ data: products });
+
+  } catch (error) {
+    console.error("Error fetching products by date:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

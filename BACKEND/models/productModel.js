@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
+   date: {
+    type: Date,
+    default: Date.now
+  },
   name: {
     type: String,
     required: true,

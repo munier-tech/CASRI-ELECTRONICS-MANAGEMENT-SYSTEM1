@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import dayjs from 'dayjs';
 import { Loader } from 'lucide-react';
+import { useProductsStore } from '../../store/useProductsStore';
 
 const ProductsSoldByDate = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const { products, isLoading, getProductsSoldByDate } = useHistoryStore();
+  const { products, isLoading, getProductsByDate } = useProductsStore();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedDate) {
-      getProductsSoldByDate(selectedDate);
+      getProductsByDate(selectedDate);
     }
   };
 

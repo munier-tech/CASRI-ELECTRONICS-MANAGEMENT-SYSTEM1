@@ -71,7 +71,13 @@ const historySchema = new mongoose.Schema({
         required: true,
       }
     }
-  ]
+  ],
+  financial : [
+    {
+    name : {
+     type : String
+    }
+}]
 });
 
 

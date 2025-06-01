@@ -31,6 +31,20 @@ export const useProductsStore = create((set) => ({
     }
   },
 
+  getProductsByDate : async (date) => {
+    try {
+      set ({ isLoading : true});
+      const {data} = await axios.get(`/products/date/${date}`)
+      set({products : data.data || [], isLoading : false , date: dayjs(date).format("DD-MM-YYYY"),
+      })
+      
+      toast.success("Products fetched successfully" )
+    } catch (error) {
+      toast.error(error?.response?.data?.message)
+      set ({ isLoading : false})
+    }
+  },
+
   getMyDailyProducts: async () => {
     try {
       set({ isLoading: true });

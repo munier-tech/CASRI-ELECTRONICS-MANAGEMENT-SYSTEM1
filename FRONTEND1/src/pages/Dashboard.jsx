@@ -14,7 +14,9 @@ import {
   Menu,
   ArrowUp,
   ArrowDown,
-  ChevronRight
+  ChevronRight,
+  FileTerminalIcon,
+  FileScanIcon
 } from "lucide-react";
 import {
   AreaChart,
@@ -85,6 +87,7 @@ const Dashboard = () => {
     { title: "staff", value: "3", icon: <Users size={20} />, path: "/UserProducts" },
     { title: "Taariikhda iibka", value: "View", icon: <FileText size={20} />, path: "/HistorySalesDate" },
     { title: "Taariikhda Amaahda", value: "View", icon: <FileText size={20} />, path: "/HistoryLiabilityByDate" },
+    { title: "bogga xisaab xidhka", value: "View", icon: <FileTerminalIcon size={20} />, path: "/FinancialLogForm" },
   ];
 
   return (
@@ -129,6 +132,8 @@ const Dashboard = () => {
                   { icon: User, label: "shaqaalaha", path: "/UserProducts" },
                   { icon: CreditCard, label: "amaahda maanta", path: "/DialyLiability" },
                   { icon: CreditCard, label: "taarikhda amaahda", path: "/HistoryLiabilityByDate" },
+                  { icon: FileScanIcon, label: "Bogga xisaab xidhka", path: "/FinancialLogForm" },
+                  { icon: FileScanIcon, label: "Taarikhda xisaab xidhka", path: "/FinancialLogDate" },
                 ].map((item, index) => (
                   <motion.div key={index} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Link

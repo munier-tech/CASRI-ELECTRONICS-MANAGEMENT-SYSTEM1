@@ -18,6 +18,8 @@ import AddDailyLiability from './components/UserActivities/AddLiability';
 import ProductsSoldByDate from './components/Admin/productsByDate';
 import Profile from './components/profile';
 import GetLiabilityByDate from './components/Admin/LiabilityByDate';
+import FinancialLogForm from './components/Admin/FinancialLog';
+import FinancialLogDate from './components/Admin/GetFinancialDate';
 
 const App = () => {
   const { checkAuth, user, isLoading, authChecked } = useUserStore();
@@ -37,7 +39,7 @@ const App = () => {
   return (
     <div className="relative min-h-screen">
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700" />
-
+      {/* <div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700" /> */}
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
@@ -58,6 +60,8 @@ const App = () => {
           <Route path="/DialyLiability" element={user?.role === "admin" ? <DialyLiability /> : <Navigate to="/" />} />
           <Route path="/dashboard" element={user?.role === "admin" ? <Dashboard /> : <Navigate to="/" />} />
           <Route path="/dailysales" element={user?.role === "admin" ? <DailySales /> : <Navigate to="/" />} />
+          <Route path="/FinancialLogForm" element={user?.role === "admin" ? <FinancialLogForm /> : <Navigate to="/" />} />
+          <Route path="/FinancialLogDate" element={user?.role === "admin" ? <FinancialLogDate /> : <Navigate to="/" />} />
         </Routes>
       </div>
       <Toaster position="top-center" />
