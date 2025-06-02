@@ -82,12 +82,13 @@ const Dashboard = () => {
   }, 0);
 
   const stats = [
-    { title: "amaahda maanta", value: "view", change: "#", icon: <DollarSign size={20} />, path: "/DialyLiability" },
+    { title: "amaahda maanta", value: "Amaah", change: "#", icon: <DollarSign size={20} />, path: "/DialyLiability" },
     { title: "iibka maanta", value: `$${totalSales}` , change: "$", icon: <ShoppingCart size={20} />, path: "/DailySales" },
-    { title: "staff", value: "3", icon: <Users size={20} />, path: "/UserProducts" },
-    { title: "Taariikhda iibka", value: "View", icon: <FileText size={20} />, path: "/HistorySalesDate" },
-    { title: "Taariikhda Amaahda", value: "View", icon: <FileText size={20} />, path: "/HistoryLiabilityByDate" },
-    { title: "bogga xisaab xidhka", value: "View", icon: <FileTerminalIcon size={20} />, path: "/FinancialLogForm" },
+    { title: "staff", value: "shaqaalaha", icon: <Users size={20} />, path: "/UserProducts" },
+    { title: "Taariikhda iibka", value: "Iibka", icon: <FileText size={20} />, path: "/HistorySalesDate" },
+    { title: "Taariikhda Amaahda", value: "Amaah", icon: <FileText size={20} />, path: "/HistoryLiabilityByDate" },
+    { title: "bogga xisaab xidhka", value: "Xisaab", icon: <FileTerminalIcon size={20} />, path: "/FinancialLogForm" },
+    { title: "taarikhda xisaab xidhka", value: "Xisaab", icon: <FileTerminalIcon size={20} />, path: "/FinancialLogDate" },
   ];
 
   return (
