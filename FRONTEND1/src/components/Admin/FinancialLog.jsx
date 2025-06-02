@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, CreditCard, Plus, Minus, Save, RefreshCw, Loader } from 'lucide-react';
+import { DollarSign, CreditCard, Plus, Minus, Save, RefreshCw, Loader, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useFinancialStore from '@/store/useFinancialStore';
 import { useProductsStore } from '../../store/useProductsStore';
 import toast from 'react-hot-toast';
+import { format } from 'date-fns';
+
 
 const FinancialLogForm = () => {
   const { createLog, isLoading } = useFinancialStore();
-  const { products, getDailyproducts } = useProductsStore();
+  const { products, getProductsByDate } = useProductsStore();
+  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
+  
 
   const [form, setForm] = useState({
     income: {
@@ -90,13 +94,13 @@ const FinancialLogForm = () => {
   const addAdjustment = () => {
     setForm((prev) => ({
       ...prev,
-      accountsAdjustments: [...prev.accountsAdjustments, { description: '', value: '' }],
+      accountsAdjustments: [...prev.accountsAdjustments, { label: '', value: '' }],
     }));
   };
   const addExpense = () => {
     setForm((prev) => ({
       ...prev,
-      expenses: [...prev.expenses, { description: '', amount: '' }],
+      expenses: [...prev.expenses, { name: '', amount: '' }],
     }));
   };
 
@@ -121,16 +125,12 @@ const FinancialLogForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Convert raw values that need conversion — 
-    // For example, for amounts that have 'raw' and 'converted' fields, you may want to parse & calculate converted value here if needed.
-
-    // You can add validation here if necessary.
 
     const result = await createLog(form);
 
     if (result.success) {
       toast.success('Financial log submitted successfully!');
-      // Optionally reset form here
+     
       setForm({
         income: {
           zdollar: '',
@@ -149,8 +149,11 @@ const FinancialLogForm = () => {
   };
 
   useEffect(() => {
-    getDailyproducts()
-  } , [getDailyproducts])
+    getProductsByDate(selectedDate);
+  }, [selectedDate, getProductsByDate]);
+
+
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 p-4">
       <motion.div
@@ -171,6 +174,19 @@ const FinancialLogForm = () => {
               Financial Log Entry
             </motion.h2>
             <p className="mt-2 text-indigo-100">Record your daily financial transactions</p>
+          </div>
+           <div className="flex flex-col md:flex-row items-center justify-between mb-8 bg-white p-4 rounded-lg shadow-md">
+            <div className="flex items-center space-x-4 mb-4 md:mb-0">
+              <Calendar className="w-6 h-6 text-indigo-600" />
+              <h1 className="text-xl font-semibold text-gray-800">Financial Log</h1>
+            </div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+              max={format(new Date(), 'yyyy-MM-dd')}
+            />
           </div>
 
           {/* Tabs */}
@@ -198,7 +214,7 @@ const FinancialLogForm = () => {
                 }`}
               >
                 <RefreshCw className="inline mr-2 h-4 w-4" />
-                Adjustments
+                Accounts
               </button>
               <button
                 type="button"
@@ -376,7 +392,7 @@ const FinancialLogForm = () => {
 
             {activeTab === 'adjustments' && (
               <div>
-                <h3 className="text-lg font-semibold mb-4 text-indigo-700">Account Adjustments</h3>
+                <h3 className="text-lg font-semibold mb-4 text-indigo-700">Account</h3>
 
                 {form.accountsAdjustments.map((adj, idx) => (
                   <div
@@ -386,9 +402,9 @@ const FinancialLogForm = () => {
                     <input
                       type="text"
                       placeholder="Description"
-                      value={adj.description}
+                      value={adj.label}
                       onChange={(e) =>
-                        handleListChange('accountsAdjustments', idx, 'description', e.target.value)
+                        handleListChange('accountsAdjustments', idx, 'label', e.target.value)
                       }
                       className="flex-1 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -434,10 +450,10 @@ const FinancialLogForm = () => {
                   >
                     <input
                       type="text"
-                      placeholder="Description"
-                      value={exp.description}
+                      placeholder="Name"
+                      value={exp.name}
                       onChange={(e) =>
-                        handleListChange('expenses', idx, 'description', e.target.value)
+                        handleListChange('expenses', idx, 'name', e.target.value)
                       }
                       className="flex-1 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />

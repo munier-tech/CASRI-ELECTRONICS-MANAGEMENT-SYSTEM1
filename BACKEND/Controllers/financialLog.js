@@ -6,7 +6,7 @@ export const createFinancialIncome = async (req, res) => {
     const { income, accountsAdjustments = [], expenses = [] } = req.body;
 
     // Fix property names (match the schema exactly)
-    const incomeTotal =
+    const incomeTotal = 
       (income?.zdollar || 0) +
       (income?.zcash?.converted || 0) +
       (income?.edahabCash?.converted || 0) +
