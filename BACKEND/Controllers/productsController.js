@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import History from "../models/historyModel.js";
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
-
+import utc from "dayjs/plugin/utc.js";
+dayjs.extend(utc);
 
 // added to the frontend
 
@@ -269,6 +270,61 @@ export const getProductsByDate = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching products by date:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+export const getAllUserByDate = async (req, res) => {
+  try {
+    // Get date from query parameters (format: YYYY-MM-DD)
+    const { date } = req.params;
+    
+    if (!date) {
+      return res.status(400).json({ message: "Date parameter is required" });
+    }
+
+    // Parse the input date and set the time range (00:00:00 to 23:59:59)
+    const startDate = dayjs(date).startOf("day").toDate();
+    const endDate = dayjs(date).endOf("day").toDate();
+
+    // Fetch all users with role 'employee' or 'admin'
+    const users = await User.find({ role: { $in: ["employee", "admin"] } });
+
+    // Map through the users and fetch their products for the specified date
+    const results = await Promise.all(
+      users.map(async (user) => {
+        const products = await Product.find({
+          user: user._id,
+          createdAt: { $gte: startDate, $lt: endDate },
+        });
+
+        return {
+          username: user.username,
+          role: user.role,
+          products,
+        };
+      })
+    );
+
+    // Filter out empty product lists (optional)
+    const filteredResults = results.filter((result) => result.products.length > 0);
+
+    // If no products found
+    if (filteredResults.length === 0) {
+      return res.status(404).json({ 
+        message: `No products found for any user on ${dayjs(date).format("YYYY-MM-DD")}` 
+      });
+    }
+
+    res.status(200).json({
+      message: `Products fetched successfully for ${dayjs(date).format("YYYY-MM-DD")}`,
+      data: filteredResults,
+      date: dayjs(date).format("YYYY-MM-DD"),
+    });
+  } catch (error) {
+    console.error("Error in getAllUsersProductsByDate:", error.message);
     res.status(500).json({ message: error.message });
   }
 };

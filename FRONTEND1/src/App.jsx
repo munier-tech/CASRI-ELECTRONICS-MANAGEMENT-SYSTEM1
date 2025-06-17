@@ -20,6 +20,7 @@ import Profile from './components/profile';
 import GetLiabilityByDate from './components/Admin/LiabilityByDate';
 import FinancialLogForm from './components/Admin/FinancialLog';
 import FinancialLogDate from './components/Admin/GetFinancialDate';
+import UserProductsByDate from './components/Admin/UserProductsByDate';
 
 const App = () => {
   const { checkAuth, user, isLoading, authChecked } = useUserStore();
@@ -58,6 +59,7 @@ const App = () => {
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/signin" />} />
           <Route path="/HistoryLiabilityByDate" element={user?.role === "admin" ? <GetLiabilityByDate /> : <Navigate to="/" />} />
           <Route path="/DialyLiability" element={user?.role === "admin" ? <DialyLiability /> : <Navigate to="/" />} />
+          <Route path="/UserProductsByDate" element={user?.role === "admin" ? <UserProductsByDate /> : <Navigate to="/" />} />
           <Route path="/dashboard" element={user?.role === "admin" ? <Dashboard /> : <Navigate to="/" />} />
           <Route path="/dailysales" element={user?.role === "admin" ? <DailySales /> : <Navigate to="/" />} />
           <Route path="/FinancialLogForm" element={user?.role === "admin" ? <FinancialLogForm /> : <Navigate to="/" />} />

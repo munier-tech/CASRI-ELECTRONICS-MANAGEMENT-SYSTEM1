@@ -30,6 +30,22 @@ export const useProductsStore = create((set) => ({
       set({ isLoading: false });
     }
   },
+  getUsersProductsByDate: async (date) => {
+  try {
+    set({ isLoading: true });
+    const { data } = await axios.get(`/products/getAllUsersByDate/${date}`, noCache);
+    set({
+      usersWithProducts: data.data || [],
+      isLoading: false,
+      date: dayjs(date).format("DD-MM-YYYY"),
+    });
+    toast.success("Fetched user sales for selected date");
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Error fetching user products by date");
+    set({ isLoading: false });
+  }
+},
+
 
   getProductsByDate : async (date) => {
     try {

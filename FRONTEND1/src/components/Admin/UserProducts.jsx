@@ -61,6 +61,9 @@ const UsersDailyProductsComponent = () => {
   );
   const heroUser = sortedUsers[0];
 
+
+  
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold text-white text-center">Today's Sales Performance</h1>
@@ -143,6 +146,7 @@ const UsersDailyProductsComponent = () => {
                       <span className="text-xs text-gray-300">{totalQuantity} {totalQuantity === 1 ? 'item' : 'items'}</span>
                     </div>
                   </div>
+                  
                 </>
               ) : (
                 <div className="text-center py-6 text-gray-400">No products sold today</div>

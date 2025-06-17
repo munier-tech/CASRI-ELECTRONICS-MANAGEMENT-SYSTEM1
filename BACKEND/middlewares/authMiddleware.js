@@ -5,35 +5,33 @@ export const protectedRoute = async (req, res, next) => {
   try {
     const accessToken = req.cookies.accessToken;
 
-  if (!accessToken) {
-    res.status(401).json({ message : "UNAUTHORIZED - no accessToken is provided"})
-  }
-
-  try {
-
-    const decoded = jwt.verify(accessToken , process.env.TOKEN_SECRET_KEY)
-    const user = await User.findById(decoded.userId).select("-password")
-
-    if (!user) {
-      res.status(401).json({ message : "UNAUTHORIZED - no user found"})
+    if (!accessToken) {
+      return res.status(401).json({ message: "UNAUTHORIZED - no accessToken is provided" });
     }
 
-    req.user = user;
-    next();
-  
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      res.status(401).json({ message : "UNAUTHORIZED - accessToken is expired"})
+    try {
+      const decoded = jwt.verify(accessToken, process.env.TOKEN_SECRET_KEY);
+      const user = await User.findById(decoded.userId).select("-password");
+
+      if (!user) {
+        return res.status(401).json({ message: "UNAUTHORIZED - no user found" });
+      }
+
+      req.user = user; // ✅ set the full user in req.user
+      next();
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "UNAUTHORIZED - accessToken is expired" });
+      }
+
+      // Catch all JWT errors
+      return res.status(401).json({ message: "UNAUTHORIZED - token error", error: error.message });
     }
-  }
-    
   } catch (error) {
-    console.error(" error in protected route middleware" , error);
-    res.status(500).json({ message : error.message })
+    console.error("Error in protectedRoute middleware:", error);
+    res.status(500).json({ message: error.message });
   }
-}
-
-
+};
 
 export const adminRoute = async (req, res, next) => {
   try {
