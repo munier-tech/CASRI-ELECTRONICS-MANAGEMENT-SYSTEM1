@@ -3,12 +3,14 @@ import AddDailyLiability from "@/components/UserActivities/AddLiability";
 import ListDailyProducts from "@/components/UserActivities/ListDailyProducts";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import AddHistoricalProduct from "@/components/UserActivities/AddProductsByDate";
 
 const Homepage = () => {
   const tabs = [
-    { id: "NOOCA ALABTA", name: "Add Product", icon: "➕" },
-    { id: "ALABTA GADAN MANTA", name: "Today's Sales", icon: "📋" },
-    { id: "ALAABTA DAYNTA", name: "Add Liability", icon: "💳" },
+    { id: "NOOCA ALABTA", name: "GALI ALAABTA MAANTA", icon: "➕" },
+    { id: "NOOCA ALABTA 1", name: "GALI ALAABTA TAARIIKH HORE", icon: "🕒" },
+    { id: "ALABTA GADAN MANTA", name: "IIBKA MAANTA", icon: "📋" },
+    { id: "ALAABTA DAYNTA", name: "GALI DAYNTA", icon: "💳" },
   ];
 
   const [activeTab, setActiveTab] = useState("NOOCA ALABTA");
@@ -24,7 +26,7 @@ const Homepage = () => {
       >
         <div className="bg-white/10 border border-white/20 text-white text-center py-3 rounded-xl shadow-lg backdrop-blur-md">
           <h1 className="text-xl font-bold">SALES DASHBOARD</h1>
-          <p className="text-sm opacity-80">Manage your daily operations</p>
+          <p className="text-sm opacity-80">BOGGA IIBKA ALAABAHA</p>
         </div>
       </motion.div>
 
@@ -35,19 +37,21 @@ const Homepage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <div className="flex overflow-x-auto pb-2 space-x-2 scrollbar-hide">
+        <div className="flex overflow-x-auto pb-2 space-x-3 scrollbar-hide snap-x snap-mandatory px-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center px-4 py-3 rounded-xl whitespace-nowrap transition-all duration-300 min-w-[100px] ${
+              className={`flex flex-col items-center justify-center min-w-[120px] snap-center px-4 py-3 rounded-xl transition-all duration-300 ${
                 activeTab === tab.id
-                  ? "bg-emerald-500/90 text-white shadow-lg"
-                  : "bg-white/10 text-gray-200 hover:bg-white/20"
+                  ? "bg-emerald-600 text-white shadow-lg"
+                  : "bg-white/10 text-white hover:bg-white/20"
               }`}
             >
-              <span className="text-lg mb-1">{tab.icon}</span>
-              <span className="text-xs font-medium">{tab.name}</span>
+              <span className="text-2xl mb-1">{tab.icon}</span>
+              <span className="text-sm font-semibold text-center leading-tight">
+                {tab.name}
+              </span>
             </button>
           ))}
         </div>
@@ -67,6 +71,16 @@ const Homepage = () => {
             transition={{ duration: 0.3 }}
           >
             <AddDailyProduct />
+          </motion.div>
+        )}
+
+        {activeTab === "NOOCA ALABTA 1" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AddHistoricalProduct />
           </motion.div>
         )}
 
@@ -95,13 +109,13 @@ const Homepage = () => {
       </motion.div>
 
       {/* Footer */}
-      <motion.div 
+      <motion.div
         className="mt-6 text-center text-white/50 text-xs"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        Swipe to see more options
+        Labo farood ku duub si aad uga beddesho tabs-ka
       </motion.div>
     </div>
   );

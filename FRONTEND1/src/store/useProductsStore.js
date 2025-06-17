@@ -61,6 +61,7 @@ export const useProductsStore = create((set) => ({
     }
   },
 
+  
   getMyDailyProducts: async () => {
     try {
       set({ isLoading: true });
@@ -76,6 +77,37 @@ export const useProductsStore = create((set) => ({
       set({ isLoading: false, products: [] });
     }
   },
+
+   addProductByDate: async (date, productData) => {
+  set({ isLoading: true, error: null, success: false, addedProduct: null });
+
+  try {
+    const response = await axios.post(
+      `/products/addProductByDate/${date}`,
+      productData,
+      {
+        withCredentials: true, // ✅ only this is needed to send cookies
+      }
+    );
+
+    toast.success(`Product added for ${date}`);
+    set({
+      success: true,
+      addedProduct: response.data.product,
+    });
+    return response.data.product;
+
+  } catch (error) {
+    const errorMessage = error.response?.data?.message ||
+      error.message ||
+      'Failed to add product for selected date';
+    toast.error(errorMessage);
+    set({ error: errorMessage });
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
 
   addProduct: async (productData) => {
     try {

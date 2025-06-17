@@ -80,6 +80,93 @@ export const addProductToDailySales = async (req, res) => {
 };
 
 
+export const addProductsToDailySalesByDate = async (req, res) => {
+  try {
+    const { date } = req.params; // DD-MM-YYYY format from URL
+    const { name, price, description, category, quantity } = req.body;
+    const userId = req.user._id;
+
+    // Validate required fields
+    if (!name || !price || !description || !quantity) {
+      return res.status(400).json({ message: "fadlan buuxi dhamaan meelaha baanan." });
+    }
+
+    // Parse and validate quantity
+    const NoOfQuantity = parseInt(quantity, 10);
+    if (isNaN(NoOfQuantity) || NoOfQuantity <= 0) {
+      return res.status(400).json({ message: "Quantity must be a positive number." });
+    }
+
+    // Parse and validate price
+    const pricedNumber = parseFloat(price);
+    if (isNaN(pricedNumber) || pricedNumber <= 0) {
+      return res.status(400).json({ message: "Price must be a positive number." });
+    }
+
+    // Validate and parse the date parameter (DD-MM-YYYY)
+    const dateParts = date.split('-');
+    if (dateParts.length !== 3) {
+      return res.status(400).json({ message: "Invalid date format. Use DD-MM-YYYY" });
+    }
+
+    const [day, month, year] = dateParts;
+    const salesDate = new Date(`${year}-${month}-${day}T00:00:00`);
+
+    if (isNaN(salesDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date" });
+    }
+
+    // Prevent adding products for future dates
+    if (salesDate > new Date()) {
+      return res.status(400).json({ message: "Cannot add products for future dates" });
+    }
+
+    // Calculate total
+    const total = pricedNumber * NoOfQuantity;
+
+    // Create new product with the specified date
+    const newProduct = new Product({
+      name,
+      price: pricedNumber,
+      description,
+      category,
+      quantity: NoOfQuantity,
+      user: userId,
+      date: salesDate,
+      total,
+      createdAt: salesDate, // Set createdAt to match the sales date
+      updatedAt: salesDate
+    });
+
+    await newProduct.save();
+
+    // Update history for the specified date
+  
+    res.status(201).json({
+      message: `Product successfully added to sales for ${date}`,
+      product: {
+        name: newProduct.name,
+        price: newProduct.price,
+        description: newProduct.description,
+        quantity: newProduct.quantity,
+        total: newProduct.total,
+        date: dayjs(salesDate).format("DD-MM-YYYY"),
+        user: newProduct.user,
+        _id: newProduct._id,
+        createdAt: newProduct.createdAt,
+        updatedAt: newProduct.updatedAt
+      }
+    });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ 
+      message: "Server error while adding product to historical date",
+      error: error.message 
+    });
+  }
+};
+
+
 
 // added
 
