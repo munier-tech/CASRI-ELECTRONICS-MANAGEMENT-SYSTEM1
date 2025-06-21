@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import axios from '../lib/axios'
+import toast from 'react-hot-toast'
 
 const useFinancialStore = create((set) => ({
   financialLogs: [],
@@ -38,7 +39,31 @@ const useFinancialStore = create((set) => ({
       set({ error: err.message, loading: false });
       return { success: false, error: err.message };
     }
+  },
+updateLog: async (id, updatedData) => {
+  try {
+    set({ isLoading: true });
+
+    const res = await axios.patch(`/financial/update/${id}`, updatedData);
+
+    set((state) => ({
+      financialLogs: state.financialLogs.map((log) =>
+        log._id === id ? res.data.data : log
+      ),
+      isLoading: false,
+      error: null,
+    }));
+
+    toast.success("Financial log updated successfully.");
+    return { success: true, data: res.data.data };
+
+  } catch (err) {
+    set({ isLoading: false, error: err.message });
+    toast.error("Failed to update financial log.");
+    return { success: false, error: err.message };
   }
+}
 }));
+
 
 export default useFinancialStore;

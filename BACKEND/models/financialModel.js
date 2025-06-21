@@ -11,55 +11,27 @@ const financialSchema = new mongoose.Schema({
       type: Number,
     },
     zcash: {
-      raw: {
-        type: Number,
-      },
-      converted: { 
-        type: Number, 
-      }
+     type : Number,
     },
-    edahab: {
-      raw: { 
-        type: Number,
-      },
+    edahabCash: {
+     type: Number,
     },
-    edahabCash : {
-      raw : {
-      type: Number,
-      
-      },
-      converted: {
-      type: Number,
-      }
-    },
-    Cash : {
-      raw : {
-      type: Number,
-      
-      },
-      converted: {
-      type: Number,
-      }
+    Cash: {
+     type : Number,
     },
     dollar: {
       type: Number,
     },
     account: {
-      raw: { 
-      type: Number,  
-      },
-      converted: {
       type: Number,
-      }
     }
   },
 
   accountsAdjustments: [
     {
-      label: 
-      { 
-       type: String,
-       default: "Acc"
+      label: { 
+        type: String,
+        default: "Acc"
       },
       value: { 
         type: Number,

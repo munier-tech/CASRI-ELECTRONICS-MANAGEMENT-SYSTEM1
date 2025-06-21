@@ -1,507 +1,247 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, CreditCard, Plus, Minus, Save, RefreshCw, Loader, Calendar } from 'lucide-react';
-import { motion } from 'framer-motion';
-import useFinancialStore from '@/store/useFinancialStore';
+import { toast } from 'react-hot-toast';
 import { useProductsStore } from '../../store/useProductsStore';
-import toast from 'react-hot-toast';
-import { format } from 'date-fns';
-
+import useFinancialStore from '../../store/useFinancialStore';
 
 const FinancialLogForm = () => {
-  const { createLog, isLoading } = useFinancialStore();
+  const { createLog, loading } = useFinancialStore();
   const { products, getProductsByDate } = useProductsStore();
-  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
-  
 
-  const [form, setForm] = useState({
-    income: {
-      zdollar: '',
-      zcash: { raw: '', converted: '' },
-      edahabCash: { raw: '', converted: '' },
-      Cash: { raw: '', converted: '' },
-      dollar: '',
-      account: { raw: '', converted: '' },
-    },
-    accountsAdjustments: [],
-    expenses: [],
+  const [date, setDate] = useState('');
+  const [productsTotal, setProductsTotal] = useState(0);
+  const [netTotal, setNetTotal] = useState(0);
+
+  const [income, setIncome] = useState({
+    zdollar: '',
+    zcash: '',
+    edahabCash: '',
+    Cash: '',
+    dollar: '',
+    account: '',
   });
 
-  const [totals, setTotals] = useState({
-    incomeTotal: 0,
-    expensesTotal: 0,
-    adjustmentsTotal: 0,
-    productsTotal: 0,
-    combinedTotal: 0,
-    balance: 0,
-    grandTotal: 0,
-  });
+  const [accountsAdjustments, setAccountsAdjustments] = useState([
+    { label: '', value: '' }
+  ]);
 
-  const [activeTab, setActiveTab] = useState('income');
+  const [expenses, setExpenses] = useState([
+    { name: '', amount: '' }
+  ]);
 
-  // Calculate totals whenever form or products change
   useEffect(() => {
-    const incomeTotal =
-      (Number(form.income.zdollar) || 0) +
-      (Number(form.income.dollar) || 0) +
-      (Number(form.income.zcash.converted) || 0) +
-      (Number(form.income.edahabCash.converted) || 0) +
-      (Number(form.income.Cash.converted) || 0) +
-      (Number(form.income.account.converted) || 0);
+    if (date) {
+      getProductsByDate(date);
+    }
+  }, [date, getProductsByDate]);
 
-    const expensesTotal = form.expenses.reduce(
-      (sum, exp) => sum + (Number(exp.amount) || 0),
-      0
-    );
+  useEffect(() => {
+    const productsSum = products.reduce((sum, product) => {
+      return sum + (product.price || 0) * (product.quantity || 1);
+    }, 0);
+    setProductsTotal(productsSum);
 
-    const adjustmentsTotal = form.accountsAdjustments.reduce(
-      (sum, adj) => sum + (Number(adj.value) || 0),
-      0
-    );
+    const incomeSum = Object.values(income).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+    const adjustmentsSum = accountsAdjustments.reduce((sum, adj) => sum + (parseFloat(adj.value) || 0), 0);
+    const expensesSum = expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
 
-    const productsTotal = products.reduce(
-      (sum, p) => sum + (Number(p.price) * Number(p.quantity) || 0),
-      0
-    );
+    setNetTotal((incomeSum + adjustmentsSum + expensesSum) - productsSum);
+  }, [products, income, accountsAdjustments, expenses]);
 
-    const combinedTotal = incomeTotal + expensesTotal + adjustmentsTotal ;
-    const balance = combinedTotal - productsTotal;
-
-    setTotals({
-      incomeTotal,
-      expensesTotal,
-      adjustmentsTotal,
-      productsTotal,
-      combinedTotal,
-      balance,
-    });
-  }, [form, products]);
-
-  // Helper to update nested form state by path string, e.g. "income.zcash.raw"
-  const handleInputChange = (path, value) => {
-    setForm((prev) => {
-      const newForm = JSON.parse(JSON.stringify(prev));
-      const keys = path.split('.');
-      let current = newForm;
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-      }
-      current[keys[keys.length - 1]] = value;
-      return newForm;
-    });
+  const handleIncomeChange = (e) => {
+    const { name, value } = e.target;
+    setIncome({ ...income, [name]: value });
   };
 
-  // Add a blank adjustment or expense item
-  const addAdjustment = () => {
-    setForm((prev) => ({
-      ...prev,
-      accountsAdjustments: [...prev.accountsAdjustments, { label: '', value: '' }],
-    }));
-  };
-  const addExpense = () => {
-    setForm((prev) => ({
-      ...prev,
-      expenses: [...prev.expenses, { name: '', amount: '' }],
-    }));
+  const handleAdjustmentChange = (index, e) => {
+    const { name, value } = e.target;
+    const updates = [...accountsAdjustments];
+    updates[index][name] = value;
+    setAccountsAdjustments(updates);
   };
 
-  // Handle adjustments or expenses input change
-  const handleListChange = (type, index, field, value) => {
-    setForm((prev) => {
-      const newList = [...prev[type]];
-      newList[index][field] = value;
-      return { ...prev, [type]: newList };
-    });
+  const handleExpenseChange = (index, e) => {
+    const { name, value } = e.target;
+    const updates = [...expenses];
+    updates[index][name] = value;
+    setExpenses(updates);
   };
 
-  // Remove adjustment or expense item
-  const removeListItem = (type, index) => {
-    setForm((prev) => {
-      const newList = [...prev[type]];
-      newList.splice(index, 1);
-      return { ...prev, [type]: newList };
-    });
-  };
+  const addAdjustment = () => setAccountsAdjustments([...accountsAdjustments, { label: '', value: '' }]);
+  const addExpense = () => setExpenses([...expenses, { name: '', amount: '' }] );
+  const removeAdjustment = (index) => setAccountsAdjustments(accountsAdjustments.filter((_, i) => i !== index));
+  const removeExpense = (index) => setExpenses(expenses.filter((_, i) => i !== index));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const parsedIncome = Object.fromEntries(
+      Object.entries(income).map(([key, val]) => [key, parseFloat(val) || 0])
+    );
 
-    const result = await createLog(form);
+    const parsedAdjustments = accountsAdjustments
+      .filter(adj => adj.value)
+      .map(adj => ({ label: adj.label || 'Acc', value: parseFloat(adj.value) || 0 }));
 
-    if (result.success) {
-      toast.success('Financial log submitted successfully!');
-     
-      setForm({
-        income: {
-          zdollar: '',
-          zcash: { raw: '', converted: '' },
-          edahabCash: { raw: '', converted: '' },
-          Cash: { raw: '', converted: '' },
-          dollar: '',
-          account: { raw: '', converted: '' },
-        },
-        accountsAdjustments: [],
-        expenses: [],
-      });
+    const parsedExpenses = expenses
+      .filter(exp => exp.amount)
+      .map(exp => ({ name: exp.name || 'Expense', amount: parseFloat(exp.amount) || 0 }));
+
+    const payload = {
+      date,
+      income: parsedIncome,
+      accountsAdjustments: parsedAdjustments,
+      expenses: parsedExpenses,
+    };
+
+    const res = await createLog(payload);
+
+    if (res.success) {
+      toast.success("Financial log saved");
+      setDate('');
+      setIncome({ zdollar: '', zcash: '', edahabCash: '', Cash: '', dollar: '', account: '' });
+      setAccountsAdjustments([{ label: '', value: '' }]);
+      setExpenses([{ name: '', amount: '' }]);
     } else {
-      alert('Error submitting financial log: ' + result.error);
+      toast.error("Failed to save financial log");
     }
   };
 
-  useEffect(() => {
-    getProductsByDate(selectedDate);
-  }, [selectedDate, getProductsByDate]);
-
-
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 p-4">
-      <motion.div
-        className="w-full max-w-4xl"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
-            <motion.h2
-              className="text-3xl font-bold text-white"
-              initial={{ y: -20 }}
-              animate={{ y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              Financial Log Entry
-            </motion.h2>
-            <p className="mt-2 text-indigo-100">Record your daily financial transactions</p>
-          </div>
-           <div className="flex flex-col md:flex-row items-center justify-between mb-8 bg-white p-4 rounded-lg shadow-md">
-            <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <Calendar className="w-6 h-6 text-indigo-600" />
-              <h1 className="text-xl font-semibold text-gray-800">Financial Log</h1>
-            </div>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-              max={format(new Date(), 'yyyy-MM-dd')}
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800 border-b pb-2">Create Financial Log</h2>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 bg-gray-50">
-            <nav className="flex">
-              <button
-                type="button"
-                onClick={() => setActiveTab('income')}
-                className={`flex-1 py-4 px-6 text-center font-medium text-sm border-b-2 ${
-                  activeTab === 'income'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <DollarSign className="inline mr-2 h-4 w-4" />
-                Income
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('adjustments')}
-                className={`flex-1 py-4 px-6 text-center font-medium text-sm border-b-2 ${
-                  activeTab === 'adjustments'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <RefreshCw className="inline mr-2 h-4 w-4" />
-                Accounts
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('expenses')}
-                className={`flex-1 py-4 px-6 text-center font-medium text-sm border-b-2 ${
-                  activeTab === 'expenses'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <Minus className="inline mr-2 h-4 w-4" />
-                Expenses
-              </button>
-            </nav>
-          </div>
-
-          {/* Totals Summary */}
-          <div className="bg-gray-100 p-4 border-b border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <h3 className="text-sm font-medium text-gray-500">Combined Total</h3>
-                <p className="text-xl font-bold text-indigo-600">${totals.combinedTotal.toFixed(2)}</p>
-              </div>
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <h3 className="text-sm font-medium text-gray-500">Balance</h3>
-                <p className="text-xl font-bold text-green-600">${totals.balance.toFixed(2)}</p>
-              </div>
-             
-            </div>
-          </div>
-
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {activeTab === 'income' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-indigo-700">Income</h3>
-
-                {/* Example Income Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Zdollar */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Zaad Dollar
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.zdollar}
-                      onChange={(e) => handleInputChange('income.zdollar', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Dollar */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dollar
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.dollar}
-                      onChange={(e) => handleInputChange('income.dollar', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* ZCash (raw and converted) */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Zaad Cash
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.zcash.raw}
-                      onChange={(e) => handleInputChange('income.zcash.raw', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Zaad Cash Badal
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.zcash.converted}
-                      onChange={(e) => handleInputChange('income.zcash.converted', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Similarly, add edahabCash, Cash, account fields here */}
-                  {/* EdahabCash */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Edahab Cash 
-                    </label>
-                    <input
-                      type="text"
-                      step="0.01"
-                      value={form.income.edahabCash.raw}
-                      onChange={(e) => handleInputChange('income.edahabCash.raw', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Edahab Cash Badal
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.edahabCash.converted}
-                      onChange={(e) => handleInputChange('income.edahabCash.converted', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Cash */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Cash 
-                    </label>
-                    <input
-                      type="text"
-                      step="0.01"
-                      value={form.income.Cash.raw}
-                      onChange={(e) => handleInputChange('income.Cash.raw', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Cash Badal
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.Cash.converted}
-                      onChange={(e) => handleInputChange('income.Cash.converted', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Account */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Account 
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.account.raw}
-                      onChange={(e) => handleInputChange('income.account.raw', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Account Badal
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.income.account.converted}
-                      onChange={(e) => handleInputChange('income.account.converted', e.target.value)}
-                      className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'adjustments' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-indigo-700">Account</h3>
-
-                {form.accountsAdjustments.map((adj, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-3 mb-3 items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      value={adj.label}
-                      onChange={(e) =>
-                        handleListChange('accountsAdjustments', idx, 'label', e.target.value)
-                      }
-                      className="flex-1 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Value"
-                      value={adj.value}
-                      onChange={(e) =>
-                        handleListChange('accountsAdjustments', idx, 'value', e.target.value)
-                      }
-                      className="w-32 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeListItem('accountsAdjustments', idx)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Remove adjustment"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={addAdjustment}
-                  className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold"
-                >
-                  <Plus size={16} /> Add Account
-                </button>
-              </div>
-            )}
-
-            {activeTab === 'expenses' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-indigo-700">Expenses</h3>
-
-                {form.expenses.map((exp, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-3 mb-3 items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Name"
-                      value={exp.name}
-                      onChange={(e) =>
-                        handleListChange('expenses', idx, 'name', e.target.value)
-                      }
-                      className="flex-1 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Amount"
-                      value={exp.amount}
-                      onChange={(e) =>
-                        handleListChange('expenses', idx, 'amount', e.target.value)
-                      }
-                      className="w-32 rounded border border-gray-300 p-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeListItem('expenses', idx)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Remove expense"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={addExpense}
-                  className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold"
-                >
-                  <Plus size={16} /> Add Expenses
-                </button>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="text-center mt-6">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50"
-              >
-                <Save size={20} /> {isLoading ? <Loader/> : 'Save Financial Log'}
-              </button>
-            </div>
-          </form>
+      {/* Date Field */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Log Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full p-2 border border-black rounded-md placeholder:text-black focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
         </div>
-      </motion.div>
-    </div>
+
+        {/* Summary */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-600">Product Costs:</span>
+            <span className="font-semibold text-red-600">-${productsTotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-600">Income Total:</span>
+            <span className="font-semibold text-green-600">
+              +${Object.values(income).reduce((sum, val) => sum + (parseFloat(val) || 0), 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-600">Adjustments Total:</span>
+            <span className="font-semibold text-blue-600">
+              +${accountsAdjustments.reduce((sum, adj) => sum + (parseFloat(adj.value) || 0), 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-600">Expenses Total:</span>
+            <span className="font-semibold text-purple-600">
+              +${expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+            <span className="text-sm font-medium text-gray-700">Net Total:</span>
+            <span className={`font-bold text-lg ${netTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              ${netTotal.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Income Inputs */}
+      <div>
+        <h3 className="text-lg font-semibold text-indigo-600">Income</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.keys(income).map((key) => (
+            <div key={key}>
+              <label className="block text-sm text-gray-600 font-bold capitalize">{key}</label>
+              <input
+                type="number"
+                name={key}
+                value={income[key]}
+                onChange={handleIncomeChange}
+                className="w-full mt-1 p-2 border border-black rounded placeholder:text-black"
+                placeholder={`Enter ${key}`}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Adjustments */}
+      <div>
+        <h3 className="text-lg font-semibold text-amber-600">Account Adjustments</h3>
+        {accountsAdjustments.map((adj, index) => (
+          <div key={index} className="grid grid-cols-5 gap-2 mb-2">
+            <input
+              name="label"
+              placeholder="Label"
+              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
+              value={adj.label}
+              onChange={(e) => handleAdjustmentChange(index, e)}
+            />
+            <input
+              name="value"
+              placeholder="Value"
+              type="number"
+              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
+              value={adj.value}
+              onChange={(e) => handleAdjustmentChange(index, e)}
+            />
+            <button type="button" onClick={() => removeAdjustment(index)} className="text-red-500">✕</button>
+          </div>
+        ))}
+        <button type="button" onClick={addAdjustment} className="text-sm  border rounded-md bg-blue-800 p-2 text-white font-bold mt-1 ">
+          + Add Adjustment
+        </button>
+      </div>
+
+      {/* Expenses */}
+      <div>
+        <h3 className="text-lg font-semibold text-red-600">Expenses</h3>
+        {expenses.map((exp, index) => (
+          <div key={index} className="grid grid-cols-5 gap-2 mb-2">
+            <input
+              name="name"
+              placeholder="Name"
+              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
+              value={exp.name}
+              onChange={(e) => handleExpenseChange(index, e)}
+            />
+            <input
+              name="amount"
+              placeholder="Amount"
+              type="number"
+              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
+              value={exp.amount}
+              onChange={(e) => handleExpenseChange(index, e)}
+            />
+            <button type="button" onClick={() => removeExpense(index)} className="text-red-500">✕</button>
+          </div>
+        ))}
+        <button type="button" onClick={addExpense} className="text-sm  border rounded-md bg-blue-800 p-2 text-white font-bold mt-1 ">
+          + Add Expense
+        </button>
+      </div>
+
+      <button
+        type="submit"
+        className={`bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition ${
+          loading ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+        disabled={loading}
+      >
+        {loading ? 'Saving...' : 'Submit Log'}
+      </button>
+    </form>
   );
 };
 
