@@ -35,14 +35,21 @@ const FinancialLogFormDate = () => {
     const date = e.target.value;
     setSelectedDate(date);
   };
-
+  
   const formatCurrency = (val) => (val ? `$${val.toFixed(2)}` : '$0.00');
-
+  
   const calculateFinalTotal = (log) => {
     const incomeTotal = Object.values(log.income).reduce((sum, val) => sum + (val || 0), 0);
     const adjustmentsTotal = log.accountsAdjustments.reduce((sum, adj) => sum + (adj.value || 0), 0);
     const expensesTotal = log.expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
-    return (incomeTotal + adjustmentsTotal - expensesTotal) - productsTotal;
+    const finalCost = incomeTotal + adjustmentsTotal + expensesTotal
+    return (incomeTotal + adjustmentsTotal + expensesTotal) - productsTotal;
+  };
+   const calculateTotal = (log) => {
+    const incomeTotal = Object.values(log.income).reduce((sum, val) => sum + (val || 0), 0);
+    const adjustmentsTotal = log.accountsAdjustments.reduce((sum, adj) => sum + (adj.value || 0), 0);
+    const expensesTotal = log.expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+    return (incomeTotal + adjustmentsTotal + expensesTotal);
   };
 
   const openEditForm = (log) => {
@@ -100,6 +107,7 @@ const FinancialLogFormDate = () => {
             {financialLogs?.length > 0 ? (
               financialLogs.map((log) => {
                 const finalTotal = calculateFinalTotal(log);
+                const finalCost = calculateTotal(log);
                 
                 return (
                   <div key={log._id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
@@ -119,8 +127,8 @@ const FinancialLogFormDate = () => {
                       <div className="bg-purple-50 p-3 rounded-lg">
                         <h4 className="font-semibold text-purple-700 mb-2">Qiimaha Alaabta</h4>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Wadarta Qiimaha Alaabta:</span>
-                          <span className="text-purple-800 font-medium">
+                          <span className="text-gray-600 font-bold">Wadarta Qiimaha Alaabta:</span>
+                          <span className="text-purple-800 text-4xl font-bold">
                             {formatCurrency(productsTotal)}
                           </span>
                         </div>
@@ -202,7 +210,7 @@ const FinancialLogFormDate = () => {
                           <li className="flex justify-between border-t pt-1">
                             <span>Wadar Guud:</span>
                             <span className="font-semibold">
-                              {formatCurrency(log.totals.combinedTotal - productsTotal)}
+                              {finalCost}
                             </span>
                           </li>
                           <li className="flex justify-between text-lg font-bold">
