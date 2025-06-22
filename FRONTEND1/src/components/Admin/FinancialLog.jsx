@@ -67,7 +67,7 @@ const FinancialLogForm = () => {
   };
 
   const addAdjustment = () => setAccountsAdjustments([...accountsAdjustments, { label: '', value: '' }]);
-  const addExpense = () => setExpenses([...expenses, { name: '', amount: '' }] );
+  const addExpense = () => setExpenses([...expenses, { name: '', amount: '' }]);
   const removeAdjustment = (index) => setAccountsAdjustments(accountsAdjustments.filter((_, i) => i !== index));
   const removeExpense = (index) => setExpenses(expenses.filter((_, i) => i !== index));
 
@@ -96,7 +96,7 @@ const FinancialLogForm = () => {
     const res = await createLog(payload);
 
     if (res.success) {
-      toast.success("Financial log saved");
+      toast.success("Financial log saved successfully");
       setDate('');
       setIncome({ zdollar: '', zcash: '', edahabCash: '', Cash: '', dollar: '', account: '' });
       setAccountsAdjustments([{ label: '', value: '' }]);
@@ -107,141 +107,193 @@ const FinancialLogForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 border-b pb-2">Create Financial Log</h2>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-5">
+            <h2 className="text-2xl font-bold text-white">Create Financial Log</h2>
+            <p className="text-blue-100">Record daily financial transactions and adjustments</p>
+          </div>
 
-      {/* Date Field */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Log Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full p-2 border border-black rounded-md placeholder:text-black focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
-        </div>
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Date and Summary Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Log Date</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
 
-        {/* Summary */}
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">Product Costs:</span>
-            <span className="font-semibold text-red-600">-${productsTotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">Income Total:</span>
-            <span className="font-semibold text-green-600">
-              +${Object.values(income).reduce((sum, val) => sum + (parseFloat(val) || 0), 0).toFixed(2)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">Adjustments Total:</span>
-            <span className="font-semibold text-blue-600">
-              +${accountsAdjustments.reduce((sum, adj) => sum + (parseFloat(adj.value) || 0), 0).toFixed(2)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">Expenses Total:</span>
-            <span className="font-semibold text-purple-600">
-              +${expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0).toFixed(2)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-            <span className="text-sm font-medium text-gray-700">Net Total:</span>
-            <span className={`font-bold text-lg ${netTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ${netTotal.toFixed(2)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Income Inputs */}
-      <div>
-        <h3 className="text-lg font-semibold text-indigo-600">Income</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Object.keys(income).map((key) => (
-            <div key={key}>
-              <label className="block text-sm text-gray-600 font-bold capitalize">{key}</label>
-              <input
-                type="number"
-                name={key}
-                value={income[key]}
-                onChange={handleIncomeChange}
-                className="w-full mt-1 p-2 border border-black rounded placeholder:text-black"
-                placeholder={`Enter ${key}`}
-              />
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <h3 className="font-semibold text-blue-800 mb-3">Financial Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Product Costs:</span>
+                    <span className="font-medium text-red-600">-${productsTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Income Total:</span>
+                    <span className="font-medium text-green-600">
+                      +${Object.values(income).reduce((sum, val) => sum + (parseFloat(val) || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Adjustments:</span>
+                    <span className="font-medium text-amber-600">
+                      +${accountsAdjustments.reduce((sum, adj) => sum + (parseFloat(adj.value) || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Expenses:</span>
+                    <span className="font-medium text-purple-600">
+                      +${expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-blue-200">
+                    <span className="text-sm font-medium text-gray-700">Net Total:</span>
+                    <span className={`font-bold ${netTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ${netTotal.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+
+            {/* Income Section */}
+            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+              <h3 className="text-lg font-semibold text-green-800 mb-3">Income Sources</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Object.keys(income).map((key) => (
+                  <div key={key} className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700 capitalize">{key}</label>
+                    <input
+                      type="number"
+                      name={key}
+                      value={income[key]}
+                      onChange={handleIncomeChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Adjustments Section */}
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold text-amber-800">Account Adjustments</h3>
+                <button
+                  type="button"
+                  onClick={addAdjustment}
+                  className="text-sm bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded"
+                >
+                  + Add Adjustment
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                {accountsAdjustments.map((adj, index) => (
+                  <div key={index} className="grid grid-cols-5 gap-3 items-center">
+                    <div className="col-span-2">
+                      <input
+                        name="label"
+                        placeholder="Description"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                        value={adj.label}
+                        onChange={(e) => handleAdjustmentChange(index, e)}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <input
+                        name="value"
+                        placeholder="Amount"
+                        type="number"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                        value={adj.value}
+                        onChange={(e) => handleAdjustmentChange(index, e)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAdjustment(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Expenses Section */}
+            <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold text-red-800">Expenses</h3>
+                <button
+                  type="button"
+                  onClick={addExpense}
+                  className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                >
+                  + Add Expense
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                {expenses.map((exp, index) => (
+                  <div key={index} className="grid grid-cols-5 gap-3 items-center">
+                    <div className="col-span-2">
+                      <input
+                        name="name"
+                        placeholder="Expense name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        value={exp.name}
+                        onChange={(e) => handleExpenseChange(index, e)}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <input
+                        name="amount"
+                        placeholder="Amount"
+                        type="number"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        value={exp.amount}
+                        onChange={(e) => handleExpenseChange(index, e)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeExpense(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                className={`w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition ${
+                  loading ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Submit Financial Log'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-
-      {/* Adjustments */}
-      <div>
-        <h3 className="text-lg font-semibold text-amber-600">Account Adjustments</h3>
-        {accountsAdjustments.map((adj, index) => (
-          <div key={index} className="grid grid-cols-5 gap-2 mb-2">
-            <input
-              name="label"
-              placeholder="Label"
-              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
-              value={adj.label}
-              onChange={(e) => handleAdjustmentChange(index, e)}
-            />
-            <input
-              name="value"
-              placeholder="Value"
-              type="number"
-              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
-              value={adj.value}
-              onChange={(e) => handleAdjustmentChange(index, e)}
-            />
-            <button type="button" onClick={() => removeAdjustment(index)} className="text-red-500">✕</button>
-          </div>
-        ))}
-        <button type="button" onClick={addAdjustment} className="text-sm  border rounded-md bg-blue-800 p-2 text-white font-bold mt-1 ">
-          + Add Adjustment
-        </button>
-      </div>
-
-      {/* Expenses */}
-      <div>
-        <h3 className="text-lg font-semibold text-red-600">Expenses</h3>
-        {expenses.map((exp, index) => (
-          <div key={index} className="grid grid-cols-5 gap-2 mb-2">
-            <input
-              name="name"
-              placeholder="Name"
-              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
-              value={exp.name}
-              onChange={(e) => handleExpenseChange(index, e)}
-            />
-            <input
-              name="amount"
-              placeholder="Amount"
-              type="number"
-              className="col-span-2 p-2 border border-black rounded placeholder:text-black"
-              value={exp.amount}
-              onChange={(e) => handleExpenseChange(index, e)}
-            />
-            <button type="button" onClick={() => removeExpense(index)} className="text-red-500">✕</button>
-          </div>
-        ))}
-        <button type="button" onClick={addExpense} className="text-sm  border rounded-md bg-blue-800 p-2 text-white font-bold mt-1 ">
-          + Add Expense
-        </button>
-      </div>
-
-      <button
-        type="submit"
-        className={`bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition ${
-          loading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-        disabled={loading}
-      >
-        {loading ? 'Saving...' : 'Submit Log'}
-      </button>
-    </form>
+    </div>
   );
 };
 
