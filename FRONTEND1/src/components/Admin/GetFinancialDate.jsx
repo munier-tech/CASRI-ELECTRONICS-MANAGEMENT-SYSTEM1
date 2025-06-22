@@ -83,7 +83,8 @@ const FinancialLogFormDate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <>
+      {isLoading ? <Loader className="animate-spin mx-auto mt-10" size={20} /> : <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-5">
@@ -391,7 +392,8 @@ const FinancialLogFormDate = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div>}
+    </>
   );
 };
 
