@@ -1,16 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { Link } from "react-router-dom";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { useLiabilityStore } from "@/store/useLiabilityStore";
 import dayjs from "dayjs";
 import { useProductsStore } from "../../store/useProductsStore";
 
 const DialyLiability = () => {
-  const { date, liabilities, isLoading, getDialyLiabilities, handleMarkAsPaid } = useLiabilityStore();
+  const {
+    date,
+    liabilities,
+    isLoading,
+    getDialyLiabilities,
+    deleteLiability,
+    setLiabilities,
+  } = useLiabilityStore();
+
   const { addProduct } = useProductsStore();
 
-  const handleChange = (id) => {
+  const handleChange = async (id) => {
+    // Optimistically remove the item from UI
+    setLiabilities((prev) => prev.filter((item) => item._id !== id));
+    
     const liability = liabilities.find((item) => item._id === id);
     if (!liability) return;
 
@@ -26,7 +36,27 @@ const DialyLiability = () => {
       return;
     }
 
-    addProduct(formattedProduct);
+    try {
+      await addProduct(formattedProduct);
+    } catch (error) {
+      console.error("Error adding product from liability:", error);
+      // Optionally, you could add the item back to the list if the request fails
+      // setLiabilities((prev) => [...prev, liability]);
+    }
+  };
+
+  const handleCelis = async (id) => {
+    // Optimistically remove the item from UI
+    setLiabilities((prev) => prev.filter((item) => item._id !== id));
+    
+    try {
+      await deleteLiability(id);
+    } catch (error) {
+      console.error("Error marking as paid:", error);
+      // Optionally, you could add the item back to the list if the request fails
+      // const liability = liabilities.find((item) => item._id === id);
+      // if (liability) setLiabilities((prev) => [...prev, liability]);
+    }
   };
 
   useEffect(() => {
@@ -92,7 +122,6 @@ const DialyLiability = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-300">{item.price * item.quantity}</td>
 
-                    {/* Paid Button (handleChange) */}
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleChange(item._id)}
@@ -102,10 +131,9 @@ const DialyLiability = () => {
                       </button>
                     </td>
 
-                    {/* Celis Button (handleMarkAsPaid) */}
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => handleMarkAsPaid(item._id)}
+                        onClick={() => handleCelis(item._id)}
                         className="bg-red-500 hover:bg-red-700 font-bold transition ease-in-out w-full duration-300 text-white px-2 py-1 rounded"
                       >
                         Celis

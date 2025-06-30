@@ -8,6 +8,12 @@ export const useLiabilityStore = create((set) => ({
   liabilities: [],
   isLoading: false,
 
+  setLiabilities: (updateFn) => {
+    set((state) => ({
+      liabilities: updateFn(state.liabilities),
+    }));
+  },
+
   addLiablity: async (liabilityData) => {
     try {
       set({ isLoading: true });
@@ -59,23 +65,28 @@ export const useLiabilityStore = create((set) => ({
         liabilities: state.liabilities.filter((liability) => liability._id !== id),
         isLoading: false,
       }));
-      toast.success("Liability deleted successfully");
+      toast.success("Liability returned successfully");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Error deleting liability");
       set({ isLoading: false });
     }
   },
- handleMarkAsPaid : async (id) => {
-  try {
-    set({isLoading : true})
-    await axios.patch(`/Liability/paid/${id}`);
-    toast.success("Marked as paid");
 
-    // Refetch or filter out from UI
-    setLiabilities(prev => prev.filter(item => item._id !== id));
-  } catch (error) {
-    toast.error(error?.response?.data?.message);
-    set({ isLoading : false})
+  handleMarkAsPaid: async (id) => {
+    try {
+      set({ isLoading: true });
+      await axios.patch(`/Liability/paid/${id}`);
+      toast.success("Marked as paid");
+
+      // Update UI
+      set((state) => ({
+        liabilities: state.liabilities.filter((item) => item._id !== id),
+        isLoading: false,
+      }));
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to mark as paid");
+      set({ isLoading: false });
+    }
   }
-}
 }));
+
